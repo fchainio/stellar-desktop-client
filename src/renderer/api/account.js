@@ -1,6 +1,6 @@
 import NP from 'number-precision'
 import StellarSdk from 'stellar-sdk'
-import { getServer} from './server'
+import { getServer, FEE, getNetworkPassphrase } from './server'
 import { readAccountData } from './storage'
 import { encrypt, decrypt } from './crypt'
 import { importAccountFromData } from './qr'
@@ -125,6 +125,8 @@ export function send(seed,pubkey,target,assetdata,amount,memo_type,memo_value,ba
   pubkey = pubkey ? pubkey : address(seed)
   let asset = getAsset(assetdata.code , assetdata.issuer)
   let server  = getServer()
+  let fee = FEE
+  let networkPassphrase = getNetworkPassphrase()
   return server.loadAccount(pubkey).then(acc=>{
     //判断资产是否不够
     let balances = acc.balances
@@ -137,7 +139,7 @@ export function send(seed,pubkey,target,assetdata,amount,memo_type,memo_value,ba
          //acc.incrementSequenceNumber();
           var payment = StellarSdk.Operation.payment({destination: target,asset: asset,amount: amountstr})
           var memo = getMemo(memo_type, memo_value);
-          var tx = new StellarSdk.TransactionBuilder(acc, {memo:memo}).addOperation(payment).build();
+          var tx = new StellarSdk.TransactionBuilder(acc, { fee, networkPassphrase, memo:memo}).addOperation(payment).setTimeout(30).build();
           tx.sign(StellarSdk.Keypair.fromSecret(seed));
           return server.submitTransaction(tx);
       })
@@ -156,7 +158,7 @@ export function send(seed,pubkey,target,assetdata,amount,memo_type,memo_value,ba
             //创建账户
             var createaccount = StellarSdk.Operation.createAccount({destination: target,startingBalance: amount})
             var memo = getMemo(memo_type, memo_value);
-            var tx = new StellarSdk.TransactionBuilder(acc, {memo:memo}).addOperation(createaccount).build();
+            var tx = new StellarSdk.TransactionBuilder(acc, {fee,networkPassphrase, memo:memo}).addOperation(createaccount).setTimeout(30).build();
             tx.sign(StellarSdk.Keypair.fromSecret(seed));
             return server.submitTransaction(tx);
         }else{
@@ -206,7 +208,7 @@ export function fund(seed,target, amount, memo_type, memo_value) {
       startingBalance: amount.toString()
     });
     var memo = getMemo(memo_type, memo_value);
-    var tx = new StellarSdk.TransactionBuilder(account, {memo:memo}).addOperation(payment).build();
+    var tx = new StellarSdk.TransactionBuilder(account, {fee: FEE, networkPassphrase, memo:memo}).addOperation(payment).build();
     tx.sign(StellarSdk.Keypair.fromSecret(seed));
     return getServer().submitTransaction(tx);
   });
@@ -302,7 +304,7 @@ export function sendByPathPayment(seed, destination, record, memo_type,memo_valu
       source: _address
     })
     console.log(account)
-    let builder = new StellarSdk.TransactionBuilder(account).addOperation(opt)
+    let builder = new StellarSdk.TransactionBuilder(account, {fee: FEE, networkPassphrase }).addOperation(opt)
 
     if(isValidMemo(memo_type,memo_value)){
       var memo = getMemo(memo_type, memo_value);

@@ -1,9 +1,9 @@
 import StellarSdk from 'stellar-sdk'
-import { getServer } from './server'
+import { getServer, FEE, getNetworkPassphrase } from './server'
 import { address as getAddress } from './account'
 
 export const ASSET_TRUST_LIMIT = "707382697076.89"
-
+let networkPassphrase = getNetworkPassphrase()
 // change trust
 // @param limit 0 means delete trust
 // 707382697076.89   FIREFLY的charcode
@@ -20,7 +20,7 @@ export function changeTrust(seed,code, issuer, limit=ASSET_TRUST_LIMIT) {
       limit: limit.toString()
     });
     console.log(account)
-    var tx = new StellarSdk.TransactionBuilder(account).addOperation(op).build();
+    var tx = new StellarSdk.TransactionBuilder(account,{fee: FEE, networkPassphrase}).addOperation(op).build();
     tx.sign(StellarSdk.Keypair.fromSecret(seed));
     return getServer().submitTransaction(tx);
   });
@@ -32,7 +32,7 @@ export function  trustAll(seed, assets = [], limit=ASSET_TRUST_LIMIT){
 
   return getServer().loadAccount(address).then((account)=>{
     
-    var tx = new StellarSdk.TransactionBuilder(account)
+    var tx = new StellarSdk.TransactionBuilder(account,{fee: FEE, networkPassphrase})
     for(var i =0,n=assets.length; i<n ; i++ ){
       let op = trustOption(assets[i].code, assets[i].issuer)
       tx = tx.addOperation(op)
@@ -60,7 +60,7 @@ export function setData(seed,name,value){
   return getServer().loadAccount(address).then((account) => {
     //account.incrementSequenceNumber();
     var op = StellarSdk.Operation.manageData(opt);
-    var tx = new StellarSdk.TransactionBuilder(account).addOperation(op).build();
+    var tx = new StellarSdk.TransactionBuilder(account,{fee: FEE, networkPassphrase}).addOperation(op).build();
     tx.sign(StellarSdk.Keypair.fromSecret(seed));
     return getServer().submitTransaction(tx);
   });
@@ -74,7 +74,7 @@ export function setDatas(seed,values){
   return getServer().loadAccount(address).then((account) => {
     //account.incrementSequenceNumber();
     var op = StellarSdk.Operation.manageData(opt);
-    var tx = new StellarSdk.TransactionBuilder(account).addOperation(op).build();
+    var tx = new StellarSdk.TransactionBuilder(account,{fee: FEE, networkPassphrase}).addOperation(op).build();
     tx.sign(StellarSdk.Keypair.fromSecret(seed));
     return getServer().submitTransaction(tx);
   });
@@ -91,7 +91,7 @@ export function setOptions(seed, values) {
   let address = getAddress(seed)
   return getServer().loadAccount(address).then((account) => {
     let op = StellarSdk.Operation.setOptions(opt);
-    let tx = new StellarSdk.TransactionBuilder(account).addOperation(op).build();
+    let tx = new StellarSdk.TransactionBuilder(account,{fee: FEE, networkPassphrase}).addOperation(op).build();
     tx.sign(StellarSdk.Keypair.fromSecret(seed));
     return getServer().submitTransaction(tx);
   })

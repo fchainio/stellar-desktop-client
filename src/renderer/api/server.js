@@ -4,6 +4,7 @@ import { OFFICIAL_HORIZON } from './horizon'
 let server = undefined
 let url = undefined
 let networkPassphrase = undefined
+let baseFee = 100
 
 export function newServer(url){
   if(url){
@@ -21,6 +22,7 @@ export function newServer(url){
     networkPassphrase = StellarSdk.Networks.PUBLIC
   }
   server = new StellarSdk.Server(url)
+  getBaseFee()
   return server
 }
 
@@ -40,5 +42,14 @@ export function getNetworkPassphrase(){
   getServer()
   return networkPassphrase;
 }
+
+export async function getBaseFee(){
+  baseFee = await getServer().getBaseFee()
+  if(typeof baseFee === 'number')return baseFee
+  baseFee = 100
+  return baseFee
+}
+
+export const FEE = baseFee
 
 export default server

@@ -1,10 +1,12 @@
 import NP from 'number-precision'
 import StellarSdk from 'stellar-sdk'
-import {getServer} from './server'
+import { getServer, FEE, getNetworkPassphrase } from './server'
 import { address as getAddress } from './account'
 import { getAsset } from './assets'
+
 var Promise = require('es6-promise').Promise
 
+let networkPassphrase = getNetworkPassphrase()
 // query address offers
 // return Promise
 export function queryOffer(address, limit = 200) {
@@ -22,7 +24,7 @@ function _offer(seed,selling, buying, amount, price) {
       amount: amount,
       price : price.toString()
     });
-    var tx = new StellarSdk.TransactionBuilder(account).addOperation(op).build();
+    var tx = new StellarSdk.TransactionBuilder(account,{fee: FEE, networkPassphrase}).addOperation(op).build();
     tx.sign(StellarSdk.Keypair.fromSecret(seed));
     return getServer().submitTransaction(tx);
   });
@@ -79,7 +81,7 @@ export function cancel(seed,offer) {
       price : price,
       offerId : offer_id
     });
-    var tx = new StellarSdk.TransactionBuilder(account).addOperation(op).build();
+    var tx = new StellarSdk.TransactionBuilder(account, {fee: FEE, networkPassphrase}).addOperation(op).build();
     tx.sign(StellarSdk.Keypair.fromSecret(seed));
     return getServer().submitTransaction(tx);
   });

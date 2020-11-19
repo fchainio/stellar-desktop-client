@@ -1,4 +1,4 @@
-const uuidv4 = require('uuid/v4')
+import { v4 as uuidv4 } from 'uuid';
 import { toBoolean } from './util.js'
 let AwesomeQR = require('../awesome-qr/awesome-qr');
 export default {

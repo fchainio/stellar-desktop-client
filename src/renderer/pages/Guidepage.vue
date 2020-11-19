@@ -51,7 +51,8 @@ import Card from '@/components/Card'
 import Vue from 'vue'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 // require styles
-import 'swiper/dist/css/swiper.css'
+// import 'swiper/dist/css/swiper.css'
+import 'swiper/swiper-bundle.css'
  
 
 export default {

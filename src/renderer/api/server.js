@@ -3,6 +3,7 @@ import { OFFICIAL_HORIZON } from './horizon'
 
 let server = undefined
 let url = undefined
+let networkPassphrase = undefined
 
 export function newServer(url){
   if(url){
@@ -13,9 +14,11 @@ export function newServer(url){
   console.log(`server api url: ${url}`)
   //StellarSdk.Network.usePublicNetwork();
   if(url.indexOf('test') >= 0){
-    StellarSdk.Network.useTestNetwork();
+    // StellarSdk.Network.useTestNetwork();
+    networkPassphrase = StellarSdk.Networks.TESTNET
   }else{
-    StellarSdk.Network.usePublicNetwork();
+    // StellarSdk.Network.usePublicNetwork();
+    networkPassphrase = StellarSdk.Networks.PUBLIC
   }
   server = new StellarSdk.Server(url)
   return server
@@ -31,6 +34,11 @@ export function setServerUrl(horizon){
   server = undefined
   url = horizon
   server = getServer()
+}
+
+export function getNetworkPassphrase(){
+  getServer()
+  return networkPassphrase;
 }
 
 export default server

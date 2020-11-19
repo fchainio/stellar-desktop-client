@@ -1,4 +1,5 @@
 import StellarSdk from 'stellar-sdk'
+import { getNetworkPassphrase } from './server'
 
 export function xdrMsg(err){
     if(err.extras && err.extras.result_xdr){
@@ -25,5 +26,7 @@ export function getXdrResultCode(err){
 //根据xdr，返回Transaction对象
 export function xdrFromTransactionEnvelope(msg){
    // return StellarSdk.xdr.TransactionEnvelope.fromXDR(msg,"base64")
-   return new StellarSdk.Transaction(msg)
+//    return new StellarSdk.Transaction(msg)
+    // return StellarSdk.xdr.TransactionEnvelope.fromXDR(msg, 'base64')
+    return  StellarSdk.TransactionBuilder.fromXDR(msg, getNetworkPassphrase())
 }
